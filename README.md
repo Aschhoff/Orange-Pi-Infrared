@@ -41,4 +41,5 @@ start sudo python3 /home/pi/OPirTX.py myRemote Power 0
 it will sent the command Power from the file myRemote to your Device
 
 viel Spass
-**Detlev Aschhoff**
+**Detlev Aschhoff
+info@vmais.de**
