@@ -14,23 +14,23 @@ from pyA20.gpio import port
 
 # call the module with output port PA0 =0 PA1 =1    and the code as binäry String "11110000.....
 def irfile(port, code):
+	delay = 5						# Value from OPiSpeed to generate 38Khz impuls
 	i=0
 	y=0
-	tp=0.000005
-	led=int(port)
+	port=int(port)
 	gpio.init()
-	gpio.setcfg(led, gpio.OUTPUT)
+	gpio.setcfg(port, gpio.OUTPUT)
+	delay = delay * 0.000001
+	code=code+"111111111" 			# extend the code with a short gap
 	
-	code=code+"111111111" 			# code extention short gap
 	
-	# Startsequenz					  360 * 26 microsec = 9000 Pulse
-	while i<360:
-		gpio.output(led, 1)			# 26 microsec Pulse ein
-		a=time.time()+tp
+	while i<360:					# Start 360 * 26 microsec = 9000 Pulse
+		gpio.output(port, 1)		# 26 microsec Pulse on
+		a=time.time()+delay
 		while time.time() < a:
 			pass
-		gpio.output(led, 0)			# Pulse aus
-		a=time.time()+tp
+		gpio.output(port, 0)		# Pulse off
+		a=time.time()+delay
 		while time.time() < a:
 			pass		
 		i+=1
@@ -39,21 +39,21 @@ def irfile(port, code):
 		pass		
 	i=0
 
-	while y < 33:
+	while y < 33:					# Output 4 * 8bit code
 
-		while i<20:					#Fix 520 microsec  = 20 * 26 microsec
-			gpio.output(led, 1)
-			a=time.time()+tp
-			while time.time() < a:	#26 microsec pulse 38KHz
+		while i<20:					#Fix 520 microsec  ==> 20 * 26 microsec
+			gpio.output(port, 1)
+			a=time.time()+delay
+			while time.time() < a:	#26 microsec pulse ==> 38KHz
 				pass
-			gpio.output(led, 0)
-			a=time.time()+tp
+			gpio.output(port, 0)
+			a=time.time()+delay
 			while time.time() < a:
 				pass		
 			i+=1
 			
-		shift=0.000500+0.001000*int(code[y])	# 1 0 from File
-		a=time.time()+shift			# gap  0.000500sec ist 0  0.0001500sec ist 1
+		shift=0.000500+0.001000*int(code[y])	# 1 0 from code
+		a=time.time()+shift			# Gap 0.000500sec is 0    0.0001500sec is 1
 		while time.time() < a:
 			pass
 		
@@ -72,12 +72,12 @@ if __name__=="__main__":
 	if nameFB == "raw":
 		code = nameKey
 	else:
-		file = open(nameFB, 'r')	#File öffnen /root/...
+		file = open(nameFB, 'r')	# File open /root/... or /home/opi
 		txt=file.readline()
-		Keys = json.loads(txt)		# von json Format zurueck in Dic
+		Keys = json.loads(txt)		# json format to Dic
 		file.close()
 		code=(Keys[nameKey])
 
-	for i in range(2):
-	irfile(port,code)
+	for i in range(2):				#  2 Repeats
+		irfile(port,code)
 		time.sleep(0.5)
